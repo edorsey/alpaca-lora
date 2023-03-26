@@ -1,0 +1,20 @@
+version: '3.5'
+services:
+  train:
+    image: edorsey/alpaca-lora:latest
+    runtime: nvidia
+    command: python3 finetune.py --base_model 'decapoda-research/llama-7b-hf' --data_path './alpaca_data_cleaned.json' --output_dir './lora-alpaca'
+    volumes:
+    - ./data:/app/lora-alpaca
+
+  inference:
+    image: edorsey/alpaca-lora:latest
+    runtime: nvidia
+    command: python3 generate-old.py --load_8bit --base_model 'decapoda-research/llama-7b-hf' --lora_weights 'tloen/alpaca-lora-7b'
+    volumes:
+    - ./data:/app/lora-alpaca
+    - ./cache:/root/.cache
+    ports:
+    - 7860:8080
+    environment:
+    - CUDA_VISIBLE_DEVICES=1
